@@ -1,1 +1,4 @@
 .env
+compressed_log.gz
+main.py
+*.json

@@ -1,6 +1,7 @@
 import boto3
 from pathlib import Path
-import gzip    
+import gzip
+import shutil 
 import environ
 import os
 # 환경변수 파일 읽어오기
@@ -57,13 +58,19 @@ class connection_to_s3:
         download the object from s3.
         file_name : file name to download from s3
         """
+        uncompress_file_paths = str(BASE_PATH) + f'/{file_name}'
         try:
             self.s3.download_file(env('BUCKET_NAME'), file_name, file_name)
-            print(f"{file_name} 다운로드가 완료되었습니다.")            
+            print(f"{file_name} 다운로드가 완료되었습니다.")
+            with gzip.open(f'{file_name}', 'rb') as f_in:
+                with open('django_log.json', 'wb') as f_out:
+                    shutil.copyfileobj(f_in, f_out)
+          
         except RuntimeError as e:
             print(f"{file_name} 다운로드에 실패했습니다. 오류내용 : ", e)
-
 
 if __name__ == '__main__':
    conn = connection_to_s3(env("ACCESS_KEY"), env("SECRET_ACCESS_KEY"))
    conn.download('compressed_log.gz')
+   
+
